@@ -307,7 +307,7 @@
                 }
             }
             
-            function processVideoUrl(url) {
+         /**  function processVideoUrl(url) {
                 // In a real app, this would be an API call to your backend
                 console.log('Processing URL:', url);
                 
@@ -366,6 +366,57 @@
                 }
             });
         });
+        **/
+            async function processVideoUrl(url) {
+    try {
+        loading.style.display = 'block';
+        
+        // Call your Azure Function API
+        const response = await fetch('/api/video-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch video info');
+        
+        const videoData = await response.json();
+        
+        // Display real video info
+        videoTitle.textContent = videoData.title;
+        videoThumbnail.src = videoData.thumbnail;
+        videoDuration.textContent = `Duration: ${videoData.duration}`;
+        
+        // Create download options
+        downloadOptions.innerHTML = '';
+        videoData.formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'download-option';
+            
+            const formatInfo = document.createElement('div');
+            formatInfo.className = 'format-info';
+            formatInfo.textContent = `${format.quality} (${format.type}) - ${format.size}`;
+            
+            const downloadBtn = document.createElement('a');
+            downloadBtn.className = 'download-option-btn';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.href = format.url;  // Link to real download URL
+            downloadBtn.download = `${videoData.title}-${format.quality}.${format.type}`;
+            
+            optionDiv.appendChild(formatInfo);
+            optionDiv.appendChild(downloadBtn);
+            downloadOptions.appendChild(optionDiv);
+        });
+        
+        loading.style.display = 'none';
+        resultContainer.style.display = 'block';
+        
+    } catch (error) {
+        loading.style.display = 'none';
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
+    }
+}
     </script>
 </body>
 </html>
