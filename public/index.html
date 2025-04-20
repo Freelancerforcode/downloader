@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Video Downloader</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --light-color: #fff;
+            --error-color: #ff4757;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .download-form {
+            background: var(--light-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        #video-url {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        #video-url:focus {
+            border-color: var(--primary-color);
+        }
+        
+        #download-btn {
+            padding: 15px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #download-btn:hover {
+            background-color: #3a56d4;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .video-info {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .thumbnail {
+            width: 120px;
+            height: 90px;
+            border-radius: 5px;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+        
+        .video-details {
+            flex: 1;
+        }
+        
+        .video-title {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .download-options {
+            margin-top: 20px;
+        }
+        
+        .download-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--secondary-color);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .format-info {
+            font-weight: bold;
+        }
+        
+        .download-option-btn {
+            padding: 8px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .download-option-btn:hover {
+            background-color: #3a56d4;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            margin-top: 50px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #video-url {
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+            
+            #download-btn {
+                border-radius: 5px;
+                width: 100%;
+            }
+            
+            .video-info {
+                flex-direction: column;
+            }
+            
+            .thumbnail {
+                width: 100%;
+                height: auto;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fast Video Downloader</h1>
+            <p class="description">Download videos from popular platforms with just one click</p>
+        </header>
+        
+        <div class="download-form">
+            <div class="input-group">
+                <input type="text" id="video-url" placeholder="Paste video link here (YouTube, Facebook, Twitter, etc.)" autocomplete="off">
+                <button id="download-btn">Download</button>
+            </div>
+            <p class="error-message" id="error-message">Please enter a valid video URL</p>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your video...</p>
+            </div>
+            
+            <div class="result-container" id="result-container">
+                <div class="video-info">
+                    <img src="" alt="Video thumbnail" class="thumbnail" id="video-thumbnail">
+                    <div class="video-details">
+                        <h3 class="video-title" id="video-title">Video Title</h3>
+                        <p id="video-duration">Duration: 00:00</p>
+                    </div>
+                </div>
+                
+                <div class="download-options" id="download-options">
+                    <!-- Options will be added dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Fast Video Downloader. This tool is for educational purposes only.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoUrlInput = document.getElementById('video-url');
+            const downloadBtn = document.getElementById('download-btn');
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('result-container');
+            const videoThumbnail = document.getElementById('video-thumbnail');
+            const videoTitle = document.getElementById('video-title');
+            const videoDuration = document.getElementById('video-duration');
+            const downloadOptions = document.getElementById('download-options');
+            
+            // Example supported domains (in a real app, you'd have many more)
+            const supportedDomains = [
+                'youtube.com',
+                'youtu.be',
+                'facebook.com',
+                'twitter.com',
+                'instagram.com',
+                'tiktok.com',
+                'vimeo.com'
+            ];
+            
+            downloadBtn.addEventListener('click', function() {
+                const url = videoUrlInput.value.trim();
+                
+                if (!isValidUrl(url)) {
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
+                errorMessage.style.display = 'none';
+                loading.style.display = 'block';
+                resultContainer.style.display = 'none';
+                
+                // Simulate API call with timeout
+                setTimeout(function() {
+                    processVideoUrl(url);
+                }, 1500);
+            });
+            
+            function isValidUrl(url) {
+                if (!url) return false;
+                
+                try {
+                    const parsedUrl = new URL(url);
+                    return supportedDomains.some(domain => parsedUrl.hostname.includes(domain));
+                } catch {
+                    return false;
+                }
+            }
+            
+            function processVideoUrl(url) {
+                // In a real app, this would be an API call to your backend
+                console.log('Processing URL:', url);
+                
+                // Simulate getting video info
+                loading.style.display = 'none';
+                
+                // Mock data - in a real app, this would come from your backend
+                const mockVideoData = {
+                    title: 'Sample Video Title',
+                    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+                    duration: '10:30',
+                    formats: [
+                        { quality: '1080p', type: 'MP4', size: '45MB', url: '#' },
+                        { quality: '720p', type: 'MP4', size: '28MB', url: '#' },
+                        { quality: '360p', type: 'MP4', size: '12MB', url: '#' },
+                        { quality: 'Audio', type: 'MP3', size: '5MB', url: '#' }
+                    ]
+                };
+                
+                // Display video info
+                videoTitle.textContent = mockVideoData.title;
+                videoThumbnail.src = mockVideoData.thumbnail;
+                videoDuration.textContent = `Duration: ${mockVideoData.duration}`;
+                
+                // Create download options
+                downloadOptions.innerHTML = '';
+                mockVideoData.formats.forEach(format => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'download-option';
+                    
+                    const formatInfo = document.createElement('div');
+                    formatInfo.className = 'format-info';
+                    formatInfo.textContent = `${format.quality} (${format.type}) - ${format.size}`;
+                    
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'download-option-btn';
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.addEventListener('click', function() {
+                        // In a real app, this would initiate the download
+                        alert(`Downloading ${format.quality} ${format.type} version...`);
+                        // window.location.href = format.url;
+                    });
+                    
+                    optionDiv.appendChild(formatInfo);
+                    optionDiv.appendChild(downloadBtn);
+                    downloadOptions.appendChild(optionDiv);
+                });
+                
+                resultContainer.style.display = 'block';
+            }
+            
+            // Allow pressing Enter key to submit
+            videoUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    downloadBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
